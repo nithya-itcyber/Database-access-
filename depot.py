@@ -17,6 +17,7 @@ def _row_to_societe(row: dict) -> Societe:
         symbole=str(row["symbole"]),
         secteur=str(row["secteur"]),
         pays=str(row["pays"]),
+        devise=str(row.get("devise") or "EUR"),
     )
 
 
@@ -56,7 +57,7 @@ def lister_societes(
         if secteur is not None and secteur != "":
             cur.execute(
                 """
-                SELECT id, nom, symbole, secteur, pays
+                SELECT id, nom, symbole, secteur, pays, devise
                 FROM societe
                 WHERE secteur = %s
                 ORDER BY nom ASC
@@ -66,7 +67,7 @@ def lister_societes(
         else:
             cur.execute(
                 """
-                SELECT id, nom, symbole, secteur, pays
+                SELECT id, nom, symbole, secteur, pays, devise
                 FROM societe
                 ORDER BY nom ASC
                 """
@@ -83,7 +84,7 @@ def lire_societe(
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, nom, symbole, secteur, pays
+            SELECT id, nom, symbole, secteur, pays, devise
             FROM societe
             WHERE id = %s
             """,
@@ -100,14 +101,15 @@ def ajouter_societe(
     societe: Societe,
 ) -> Societe:
     """Insert a Societe using parameters, commit on success, and rollback on error."""
+    devise = societe.devise or "EUR"
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO societe (nom, symbole, secteur, pays)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO societe (nom, symbole, secteur, pays, devise)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                (societe.nom, societe.symbole, societe.secteur, societe.pays),
+                (societe.nom, societe.symbole, societe.secteur, societe.pays, devise),
             )
             new_id = cur.lastrowid
         conn.commit()
@@ -121,6 +123,7 @@ def ajouter_societe(
         symbole=societe.symbole,
         secteur=societe.secteur,
         pays=societe.pays,
+        devise=devise,
     )
 
 

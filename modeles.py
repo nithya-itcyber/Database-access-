@@ -9,6 +9,7 @@ class Societe:
     symbole: str
     secteur: str
     pays: str
+    devise: str = "EUR"
     id: int | None = None
 
 
